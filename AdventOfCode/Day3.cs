@@ -5,10 +5,10 @@ namespace AdventOfCode;
 public class Day3(string inputFilename) : IDay
 {
     // Regex that matches mul(X,Y) where X and Y are integers (1 to 3 digits long)
-    private readonly Regex _mulRegex = new Regex(@"mul\((\d{1,3}),(\d{1,3})\)");
+    private readonly Regex _mulRegex = new(@"mul\((\d{1,3}),(\d{1,3})\)");
 
-    private readonly Regex _doRegex = new Regex(@"do\(\)");
-    private readonly Regex _dontRegex = new Regex(@"don\'t\(\)");
+    private readonly Regex _doRegex = new(@"do\(\)");
+    private readonly Regex _dontRegex = new(@"don\'t\(\)");
 
 
     public void Part1()
@@ -33,10 +33,9 @@ public class Day3(string inputFilename) : IDay
 
         var sum = 0;
 
-        foreach (Match m in mulMatches)
+        foreach (var m in mulMatches)
         {
             var mulIndex = m.Index;
-
             // Get closest smallest key in dict
             var closestDoKey = doMatchIndexes.FirstOrDefault(k => k < mulIndex);
             var closestDontKey = dontMatchIndexes.FirstOrDefault(k => k < mulIndex);
@@ -61,7 +60,6 @@ public class Day3(string inputFilename) : IDay
                 sum += int.Parse(m.Groups[1].Value) * int.Parse(m.Groups[2].Value);
             }
         }
-
         Console.WriteLine(sum);
     }
 }
