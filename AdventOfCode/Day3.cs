@@ -24,19 +24,17 @@ public class Day3(string inputFilename) : IDay
     public void Part2()
     {
         var input = File.ReadAllText(inputFilename);
-
         var mulMatches = _mulRegex.Matches(input).OrderBy(m => m.Index);
         var doMatchIndexes = _doRegex.Matches(input).Select(m => m.Index).OrderByDescending(m => m);
         var dontMatchIndexes = _dontRegex.Matches(input).Select(m => m.Index).OrderByDescending(m => m);
 
         var enabled = true;
-
         var sum = 0;
 
         foreach (var m in mulMatches)
         {
             var mulIndex = m.Index;
-            // Get closest smallest key in dict
+            // Get closest next smallest index 
             var closestDoKey = doMatchIndexes.FirstOrDefault(k => k < mulIndex);
             var closestDontKey = dontMatchIndexes.FirstOrDefault(k => k < mulIndex);
 
