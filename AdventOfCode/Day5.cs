@@ -6,7 +6,7 @@ public class Day5(string inputFilename) : IDay
     {
         var input = File.ReadAllLines(inputFilename);
         var rules = input.TakeWhile(i => !string.IsNullOrEmpty(i))
-            .Select(i => i.Split('|').Select(x => int.Parse(x)).ToArray());
+            .Select(i => i.Split('|').Select(int.Parse).ToArray());
         var ruleDict = new Dictionary<int, List<int>>();
         foreach (var rule in rules)
         {
@@ -22,14 +22,14 @@ public class Day5(string inputFilename) : IDay
             }
         }
 
-        var result = input.Skip(rules.Count() + 1).Select(i => i.Split(',').Select(x => int.Parse(x)).ToArray())
+        var result = input.Skip(rules.Count() + 1).Select(i => i.Split(',').Select(int.Parse).ToArray())
             .Where(u => IsUpdateInRightOrder(u, ruleDict))
             .Select(u => u[u.Length / 2])
             .Sum();
         Console.WriteLine(result);
     }
 
-    private bool IsUpdateInRightOrder(int[] update, Dictionary<int, List<int>> rules)
+    private static bool IsUpdateInRightOrder(int[] update, Dictionary<int, List<int>> rules)
     {
         for (var i = 0; i < update.Length; i++)
         {
@@ -67,7 +67,7 @@ public class Day5(string inputFilename) : IDay
             }
         }
 
-        var result = input.Skip(rules.Count() + 1).Select(i => i.Split(',').Select(x => int.Parse(x)).ToArray())
+        var result = input.Skip(rules.Count() + 1).Select(i => i.Split(',').Select(int.Parse).ToArray())
             .Where(u => !IsUpdateInRightOrder(u, ruleDict))
             .Select(u => RecursiveSort(u, ruleDict))
             .Select(u => u[u.Length / 2])
@@ -75,7 +75,7 @@ public class Day5(string inputFilename) : IDay
         Console.WriteLine(result);
     }
 
-    private int[] RecursiveSort(int[] update, Dictionary<int, List<int>> ruleDict)
+    private static int[] RecursiveSort(int[] update, Dictionary<int, List<int>> ruleDict)
     {
         var firstHalf = update.Take(update.Length / 2);
         var secondHalf = update.Skip(update.Length / 2);
@@ -89,7 +89,7 @@ public class Day5(string inputFilename) : IDay
         return Sort(RecursiveSort(firstHalf.ToArray(), ruleDict).Concat(RecursiveSort(secondHalf.ToArray(), ruleDict)).ToArray(), ruleDict);
     }
 
-    private int[] Sort(int[] update, Dictionary<int, List<int>> rules)
+    private static int[] Sort(int[] update, Dictionary<int, List<int>> rules)
     {
         for (var i = 0; i < update.Length; i++)
         {
@@ -101,9 +101,7 @@ public class Day5(string inputFilename) : IDay
                     {
                         // switch
                         var index = Array.IndexOf(update, precedingNum);
-                        var temp = update[i];
-                        update[i] = update[index];
-                        update[index] = temp;
+                        (update[i], update[index]) = (update[index], update[i]);
                         Sort(update, rules);
                     }
                 }

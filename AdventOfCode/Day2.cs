@@ -10,20 +10,20 @@ public class Day2(string inputFilename) : IDay
         Console.WriteLine(count);
     }
 
-    private bool IsReportSafePartOne(int[] line)
+    private static bool IsReportSafePartOne(int[] line)
     {
-        var diffs = GetDiffs(line);
+        var diffs = GetDiffs(line).ToList();
         return ((diffs.All(d => Math.Abs(d) >= 1 && Math.Abs(d) <= 3)) &&
                 (diffs.All(d => d > 0) || diffs.All(d => d < 0)));
     }
 
-    private IEnumerable<int> GetDiffs(int[] line)
+    private static IEnumerable<int> GetDiffs(int[] line)
     {
         return line.Take(line.Count() - 1)
             .Select((v, i) => line[i + 1] - v);
     }
 
-    private bool IsReportSafePartTwo(int[] line)
+    private static bool IsReportSafePartTwo(int[] line)
     {
         var allOptions = new List<int[]>() { line };
         // For each element, create version of list with it removed
