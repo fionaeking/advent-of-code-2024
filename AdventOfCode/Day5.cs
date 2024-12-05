@@ -51,7 +51,7 @@ public class Day5(string inputFilename) : IDay
     {
         var input = File.ReadAllLines(inputFilename);
         var rules = input.TakeWhile(i => !string.IsNullOrEmpty(i))
-            .Select(i => i.Split('|').Select(x => int.Parse(x)).ToArray());
+            .Select(i => i.Split('|').Select(int.Parse).ToArray());
         var ruleDict = new Dictionary<int, List<int>>();
         foreach (var rule in rules)
         {
@@ -79,14 +79,15 @@ public class Day5(string inputFilename) : IDay
     {
         var firstHalf = update.Take(update.Length / 2);
         var secondHalf = update.Skip(update.Length / 2);
-        if (firstHalf.Count() <= 2)
+        if (firstHalf.Count() > 2)
         {
-            // Stop splitting start sorting
-            var sortedFirstHalf = Sort(firstHalf.ToArray(), ruleDict);
-            var sortedSecondHalf = Sort(secondHalf.ToArray(), ruleDict);
-            return Sort(sortedFirstHalf.Concat(sortedSecondHalf).ToArray(), ruleDict);
+            return Sort(RecursiveSort(firstHalf.ToArray(), ruleDict).Concat(RecursiveSort(secondHalf.ToArray(), ruleDict))
+                    .ToArray(), ruleDict);
         }
-        return Sort(RecursiveSort(firstHalf.ToArray(), ruleDict).Concat(RecursiveSort(secondHalf.ToArray(), ruleDict)).ToArray(), ruleDict);
+        // Stop splitting start sorting
+        var sortedFirstHalf = Sort(firstHalf.ToArray(), ruleDict);
+        var sortedSecondHalf = Sort(secondHalf.ToArray(), ruleDict);
+        return Sort(sortedFirstHalf.Concat(sortedSecondHalf).ToArray(), ruleDict);
     }
 
     private static int[] Sort(int[] update, Dictionary<int, List<int>> rules)

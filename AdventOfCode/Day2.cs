@@ -19,7 +19,7 @@ public class Day2(string inputFilename) : IDay
 
     private static IEnumerable<int> GetDiffs(int[] line)
     {
-        return line.Take(line.Count() - 1)
+        return line.Take(line.Length - 1)
             .Select((v, i) => line[i + 1] - v);
     }
 
