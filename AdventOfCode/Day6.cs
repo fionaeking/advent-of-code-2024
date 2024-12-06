@@ -4,6 +4,9 @@ namespace AdventOfCode;
 
 public class Day6(string inputFilename) : IDay
 {
+    private const char ObstacleChar = '#';
+    private const char StartChar = '^';
+
     public void Part1()
     {
         var input = File.ReadAllLines(inputFilename).Select(x => x.ToCharArray()).ToArray();
@@ -12,7 +15,7 @@ public class Day6(string inputFilename) : IDay
         Console.WriteLine($"Part 1: {visitedPointsDirections.Select(x => x.Item1).Distinct().Count()}");
     }
 
-    private List<(Point, Direction)> GetVisitedPoints(char[][] input, Point currPoint)
+    private static List<(Point, Direction)> GetVisitedPoints(char[][] input, Point currPoint)
     {
         var visitedPointsDirections = new List<(Point, Direction)>() { (currPoint, Direction.Up) };
         var currDirection = Direction.Up;
@@ -27,7 +30,7 @@ public class Day6(string inputFilename) : IDay
                         return visitedPointsDirections;
                     }
 
-                    if (input[nextYup][currPoint.X] == '#')
+                    if (input[nextYup][currPoint.X] == ObstacleChar)
                     {
                         currDirection = Direction.Right;
                     }
@@ -44,7 +47,7 @@ public class Day6(string inputFilename) : IDay
                         return visitedPointsDirections;
                     }
 
-                    if (input[nextYdown][currPoint.X] == '#')
+                    if (input[nextYdown][currPoint.X] == ObstacleChar)
                     {
                         currDirection = Direction.Left;
                     }
@@ -61,7 +64,7 @@ public class Day6(string inputFilename) : IDay
                         return visitedPointsDirections;
                     }
 
-                    if (input[currPoint.Y][nextXright] == '#')
+                    if (input[currPoint.Y][nextXright] == ObstacleChar)
                     {
                         currDirection = Direction.Down;
                     }
@@ -77,7 +80,7 @@ public class Day6(string inputFilename) : IDay
                         return visitedPointsDirections;
                     }
 
-                    if (input[currPoint.Y][nextXleft] == '#')
+                    if (input[currPoint.Y][nextXleft] == ObstacleChar)
                     {
                         currDirection = Direction.Up;
                     }
@@ -97,14 +100,14 @@ public class Day6(string inputFilename) : IDay
         }
     }
 
-    private Point GetStartPoint(char[][] input)
+    private static Point GetStartPoint(char[][] input)
     {
         for (var i = 0; i < input.Length; i++)
         {
             for (var j = 0; j < input[0].Length; j++)
             {
                 var ch = input[i][j];
-                if (ch == '^')
+                if (ch == StartChar)
                 {
                     return new Point()
                     {
@@ -114,12 +117,12 @@ public class Day6(string inputFilename) : IDay
                 }
             }
         }
-        throw new Exception();
+        throw new Exception($"Starting character {StartChar} not found");
     }
 
     public void Part2()
     {
-        // TODO extremely slow!
+        // TODO works but extremely slow! Be more efficient about allPossibleInputs (lots of duplicate work)
         var input = File.ReadAllLines(inputFilename).Select(x => x.ToCharArray()).ToArray();
         var currPoint = GetStartPoint(input);
 
@@ -135,11 +138,11 @@ public class Day6(string inputFilename) : IDay
                 if (visitedPointsDirections.Any(x => x.Item1.X == j && x.Item1.Y == i))
                 {
                     var ch = input[i][j];
-                    if (ch != '^')
+                    if (ch != StartChar)
                     {
                         // Read in again to get deep clone of input array
                         var copyArray = File.ReadAllLines(inputFilename).Select(x => x.ToCharArray()).ToArray();
-                        copyArray[i][j] = '#';
+                        copyArray[i][j] = ObstacleChar;
                         allPossibleInputs.Add(copyArray);
                     }
                 }
@@ -150,7 +153,7 @@ public class Day6(string inputFilename) : IDay
         Console.WriteLine($"Part 2: {count}");
     }
 
-    private bool IsInfiniteLoop(char[][] i, Point currPoint)
+    private static bool IsInfiniteLoop(char[][] i, Point currPoint)
     {
         try
         {
@@ -170,7 +173,6 @@ public enum Direction
     Up, Down, Left, Right
 }
 
-// Create new exception type
 public class InfiniteLoopException : Exception
 {
     public InfiniteLoopException()
