@@ -9,12 +9,12 @@ internal class Program
         var stopwatch = new Stopwatch();
         stopwatch.Start();
 
-        var day = new Day5("PuzzleInput.txt");
+        var day = new Day6("PuzzleInput.txt");
         day.Part1();
         day.Part2();
 
         stopwatch.Stop();
         var elapsedTime = stopwatch.Elapsed;
-        Console.WriteLine("Elapsed time in ms: " + elapsedTime.Milliseconds);
+        Console.WriteLine("Elapsed time in ms: " + elapsedTime.TotalMilliseconds);
     }
 }
