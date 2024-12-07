@@ -28,7 +28,7 @@ public class Day7(string inputFilename) : IDay
             }
             possibleResults = newValues.Where(p => p <= targetValue).ToList();
         }
-        return (possibleResults.Contains(targetValue));
+        return possibleResults.Contains(targetValue);
     }
 
     private static IEnumerable<Equation> ParseInput(string inputFilename)
