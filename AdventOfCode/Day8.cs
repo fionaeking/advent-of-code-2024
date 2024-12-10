@@ -132,6 +132,4 @@ public class Day8(string inputFilename) : IDay
         var count = antiNodes.Distinct();
         Console.WriteLine(count.Count());
     }
-
-
 }
