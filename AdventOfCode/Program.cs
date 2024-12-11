@@ -9,7 +9,7 @@ internal class Program
         var stopwatch = new Stopwatch();
         stopwatch.Start();
 
-        var day = new Day9("PuzzleInput.txt");
+        var day = new Day10("PuzzleInput.txt");
         day.Part1();
         day.Part2();
 
