@@ -7,22 +7,17 @@ public class Day10(string inputFilename) : IDay
 {
     public void Part1()
     {
-        var input = File.ReadAllLines(inputFilename)
-            .Select(b => b.Select(c => int.Parse(c.ToString())).ToArray()).ToArray();
-        var score = 0;
-        for (var i = 0; i < input.Length; i++)
-        {
-            for (var j = 0; j < input[i].Length; j++)
-            {
-                if (input[i][j] == 0)
-                {
-                    // Check if hiking trail
-                    var a = GetAllHikingTrails(i, j, input).Count();
-                    score += a;
-                }
-            }
-        }
+        var input = ParseInput();
+        var score = input.SelectMany((row, i) => row.Select((val, j) => new { val, i, j }))
+            .Where(x => x.val == 0)
+            .Sum(x => GetAllHikingTrails(x.i, x.j, input).Distinct().Count());
         Console.WriteLine(score);
+    }
+
+    private int[][] ParseInput()
+    {
+        return File.ReadAllLines(inputFilename)
+            .Select(b => b.Select(c => int.Parse(c.ToString())).ToArray()).ToArray(); ;
     }
 
     private IEnumerable<Point> GetAllHikingTrails(int i, int j, int[][] input)
@@ -50,11 +45,15 @@ public class Day10(string inputFilename) : IDay
         {
             squaresToCheck.Add(new Point(j + 1, i));
         }
-        return squaresToCheck.Where(x => input[x.Y][x.X] == currVal + 1).SelectMany(x => GetAllHikingTrails(x.Y, x.X, input)).Distinct();
+        return squaresToCheck.Where(x => input[x.Y][x.X] == currVal + 1).SelectMany(x => GetAllHikingTrails(x.Y, x.X, input));
     }
 
     public void Part2()
     {
-        throw new NotImplementedException();
+        var input = ParseInput();
+        var score = input.SelectMany((row, i) => row.Select((val, j) => new { val, i, j }))
+            .Where(x => x.val == 0)
+            .Sum(x => GetAllHikingTrails(x.i, x.j, input).Count());
+        Console.WriteLine(score);
     }
 }
