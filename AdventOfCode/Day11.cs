@@ -37,30 +37,29 @@ public class Day11(string inputFilename) : IDay
         {
             newInput.Push(i * 2024);
         }
-
         return newInput;
     }
 
     public void Part2()
     {
         var input = File.ReadAllText(inputFilename).Split(" ").Select(long.Parse).ToList();
-        var newInput = input.Select(x => new InputNum()
+        var newInput = input.Select(x => new Stone()
         {
-            StoneNum = x,
+            Number = x,
             Multiplier = 1
         }).ToList();
 
         for (var blinkCount = 0; blinkCount < 75; blinkCount++)
         {
-            var groupedInput = newInput.GroupBy(i => i.StoneNum);
-            newInput = new List<InputNum>();
+            var groupedInput = newInput.GroupBy(i => i.Number);
+            newInput = [];
             foreach (var i in groupedInput)
             {
                 var a = ApplyRule(i.Key).ToList();
                 var sum = i.ToList().Select(x => x.Multiplier).Sum();
-                newInput.AddRange(a.Select(x => new InputNum()
+                newInput.AddRange(a.Select(x => new Stone()
                 {
-                    StoneNum = x,
+                    Number = x,
                     Multiplier = sum
                 }));
             }
@@ -69,8 +68,8 @@ public class Day11(string inputFilename) : IDay
     }
 }
 
-public class InputNum
+public class Stone
 {
-    public long StoneNum { get; set; }
+    public long Number { get; set; }
     public long Multiplier { get; set; }
 }
