@@ -16,13 +16,15 @@ public class Day15(string inputFilename) : IDay
         {
             for (var j = 0; j < warehouseInput[i].Length; j++)
             {
-                if (input[i][j] == '@')
+                switch (input[i][j])
                 {
-                    robotPosition = new Point(j, i);
-                }
-                else if (input[i][j] == 'O' || input[i][j] == '#')
-                {
-                    warehouseMap.Add(new Point(j, i), input[i][j]);
+                    case '@':
+                        robotPosition = new Point(j, i);
+                        break;
+                    case 'O':
+                    case '#':
+                        warehouseMap.Add(new Point(j, i), input[i][j]);
+                        break;
                 }
             }
         }
@@ -57,18 +59,13 @@ public class Day15(string inputFilename) : IDay
 
     private Point? CanItMove(Point currPos, Dictionary<Point, char> warehouseMap, char instruction)
     {
-        var newPos = GetNextPosition(instruction, currPos);
-        if (warehouseMap.ContainsKey(newPos))
+        while (true)
         {
-            if (warehouseMap[newPos] == '#')
-            {
-                // wall - don't move
-                return null;
-            }
-            // box in way - check if can move
-            return CanItMove(newPos, warehouseMap, instruction);
+            var newPos = GetNextPosition(instruction, currPos);
+            if (!warehouseMap.TryGetValue(newPos, out var value)) return newPos;
+            if (value == '#') return null;
+            currPos = newPos;
         }
-        return newPos;
     }
 
     private Point GetNextPosition(char instruction, Point currentPos)
@@ -95,19 +92,19 @@ public class Day15(string inputFilename) : IDay
         {
             for (var j = 0; j < warehouseInput[i].Length; j = j + 1)
             {
-                if (input[i][j] == '@')
+                switch (input[i][j])
                 {
-                    robotPosition = new Point(2 * j, i);
-                }
-                else if (input[i][j] == 'O')
-                {
-                    warehouseMap.Add(new Point(2 * j, i), '[');
-                    warehouseMap.Add(new Point(2 * j + 1, i), ']');
-                }
-                else if (input[i][j] == '#')
-                {
-                    warehouseMap.Add(new Point(2 * j, i), input[i][j]);
-                    warehouseMap.Add(new Point(2 * j + 1, i), input[i][j]);
+                    case '@':
+                        robotPosition = new Point(2 * j, i);
+                        break;
+                    case 'O':
+                        warehouseMap.Add(new Point(2 * j, i), '[');
+                        warehouseMap.Add(new Point(2 * j + 1, i), ']');
+                        break;
+                    case '#':
+                        warehouseMap.Add(new Point(2 * j, i), input[i][j]);
+                        warehouseMap.Add(new Point(2 * j + 1, i), input[i][j]);
+                        break;
                 }
             }
         }
@@ -122,168 +119,138 @@ public class Day15(string inputFilename) : IDay
         var currentPos = robotPosition;
         foreach (var instruction in instructions)
         {
-            // deep clone warehouseMap
-            var newWarehouseMap = new Dictionary<Point, char>(warehouseMap);
+            // account for immutable/mutable mess!
+            var warehouseMapClone = new Dictionary<Point, char>(warehouseMap);
             var g = CanItMoveTwo(currentPos, warehouseMap, instruction);
             if (g is null)
             {
-                warehouseMap = newWarehouseMap;
+                warehouseMap = warehouseMapClone;
             }
             else
             {
                 warehouseMap = g;
                 currentPos = GetNextPosition(instruction, currentPos);
             }
-
-            ////print warehouse map
-            //for (var i = 0; i <= warehouseMap.Keys.MaxBy(f => f.Y).Y; i++)
-            //{
-            //    for (var j = 0; j <= warehouseMap.Keys.MaxBy(f => f.X).X; j++)
-            //    {
-            //        if (warehouseMap.ContainsKey(new Point(j, i)))
-            //        {
-            //            Console.Write(warehouseMap[new Point(j, i)]);
-            //        }
-            //        else if (j == currentPos.X && i == currentPos.Y)
-            //        {
-            //            Console.Write("@");
-            //        }
-            //        else
-            //        {
-            //            Console.Write('.');
-            //        }
-            //    }
-            //
-            //    Console.WriteLine();
-            //}
-
-
         }
         return warehouseMap;
     }
 
     private Dictionary<Point, char>? CanItMoveTwo(Point currPos, Dictionary<Point, char> warehouseMap, char instruction)
     {
-        //if (instruction == '^')
-        // {
-        //     Console.WriteLine("------");
-        // }
         var newPos = GetNextPosition(instruction, currPos);
         if (warehouseMap.ContainsKey(newPos))
         {
-            if (warehouseMap[newPos] == '#')
+            switch (warehouseMap[newPos])
             {
-                // wall - don't move
-                return null;
+                case '#':
+                    // wall - don't move
+                    return null;
+                case '[':
+                    {
+                        if (instruction == '>')
+                        {
+                            var rightCheck = GetNextPosition('>', newPos);
+
+                            var g = CanItMoveTwo(rightCheck, warehouseMap, instruction);
+                            if (g is null)
+                            {
+                                return null;
+                            }
+
+                            warehouseMap = g;
+
+                            var f = CanItMoveTwo(newPos, warehouseMap, instruction);
+                            if (f is null)
+                            {
+                                return null;
+                            }
+
+                            warehouseMap = f;
+                        }
+                        else
+                        {
+                            // box in way - check if can move
+                            var f = CanItMoveTwo(newPos, warehouseMap, instruction);
+                            if (f is null)
+                            {
+                                return null;
+                            }
+                            warehouseMap = f;
+
+                            var rightCheck = GetNextPosition('>', newPos);
+                            var g = CanItMoveTwo(rightCheck, warehouseMap, instruction);
+                            if (g is null)
+                            {
+                                return null;
+                            }
+                            warehouseMap = g;
+                        }
+
+                        if (!warehouseMap.TryGetValue(currPos, out var chL))
+                        {
+                            return warehouseMap;
+                        }
+
+                        warehouseMap.Remove(currPos);
+                        warehouseMap[newPos] = chL;
+                        return warehouseMap;
+                    }
+                case ']':
+                    {
+                        if (instruction == '<')
+                        {
+                            // box in way - check if can move
+                            var leftCheck = GetNextPosition('<', newPos);
+                            var g = CanItMoveTwo(leftCheck, warehouseMap, instruction);
+                            if (g is null)
+                            {
+                                return null;
+                            }
+                            warehouseMap = g;
+                            var f = CanItMoveTwo(newPos, warehouseMap, instruction);
+                            if (f is null)
+                            {
+                                return null;
+                            }
+                            warehouseMap = f;
+                        }
+                        else
+                        {
+                            // box in way - check if can move
+                            var leftCheck = GetNextPosition('<', newPos);
+                            var f = CanItMoveTwo(newPos, warehouseMap, instruction);
+                            if (f is null)
+                            {
+                                return null;
+                            }
+
+                            warehouseMap = f;
+                            var g = CanItMoveTwo(leftCheck, warehouseMap, instruction);
+                            if (g is null)
+                            {
+                                return null;
+                            }
+                            warehouseMap = g;
+                        }
+
+                        if (!warehouseMap.TryGetValue(currPos, out var chR))
+                        {
+                            return warehouseMap;
+                        }
+
+                        warehouseMap.Remove(currPos);
+                        warehouseMap[newPos] = chR;
+                        return warehouseMap;
+                    }
             }
-            if (warehouseMap[newPos] == '[')
-            {
-                if (instruction == '>')
-                {
-                    var rightCheck = GetNextPosition('>', newPos);
-
-                    var g = CanItMoveTwo(rightCheck, warehouseMap, instruction);
-                    if (g is null)
-                    {
-                        return null;
-                    }
-
-                    warehouseMap = g;
-
-                    var f = CanItMoveTwo(newPos, warehouseMap, instruction);
-                    if (f is null)
-                    {
-                        return null;
-                    }
-
-                    warehouseMap = f;
-                }
-                else
-                {
-                    // box in way - check if can move
-                    var f = CanItMoveTwo(newPos, warehouseMap, instruction);
-                    if (f is null)
-                    {
-                        return null;
-                    }
-                    warehouseMap = f;
-
-                    var rightCheck = GetNextPosition('>', newPos);
-                    var g = CanItMoveTwo(rightCheck, warehouseMap, instruction);
-                    if (g is null)
-                    {
-                        return null;
-                    }
-                    warehouseMap = g;
-                }
-
-                if (!warehouseMap.ContainsKey(currPos))
-                {
-                    return warehouseMap;
-                }
-                var chh = warehouseMap[currPos];
-                warehouseMap.Remove(currPos);
-                warehouseMap[newPos] = chh;
-                return warehouseMap;
-            }
-            if (warehouseMap[newPos] == ']')
-            {
-                if (instruction == '<')
-                {
-                    // box in way - check if can move
-                    var leftCheck = GetNextPosition('<', newPos);
-                    var g = CanItMoveTwo(leftCheck, warehouseMap, instruction);
-                    if (g is null)
-                    {
-                        return null;
-                    }
-                    warehouseMap = g;
-                    var f = CanItMoveTwo(newPos, warehouseMap, instruction);
-                    if (f is null)
-                    {
-                        return null;
-                    }
-                    warehouseMap = f;
-                }
-                else
-                {
-                    // box in way - check if can move
-                    var leftCheck = GetNextPosition('<', newPos);
-                    var f = CanItMoveTwo(newPos, warehouseMap, instruction);
-                    if (f is null)
-                    {
-                        return null;
-                    }
-
-                    warehouseMap = f;
-                    var g = CanItMoveTwo(leftCheck, warehouseMap, instruction);
-                    if (g is null)
-                    {
-                        return null;
-                    }
-                    warehouseMap = g;
-                }
-
-                if (!warehouseMap.ContainsKey(currPos))
-                {
-                    return warehouseMap;
-                }
-                var chhhh = warehouseMap[currPos];
-                warehouseMap.Remove(currPos);
-                warehouseMap[newPos] = chhhh;
-                return warehouseMap;
-            }
-            //var l = CanItMoveTwo(newPos, warehouseMap, instruction);
-            //l.Add(newPos);
-            //return l;
         }
 
         // i.e. if not robot
-        if (!warehouseMap.ContainsKey(currPos))
+        if (!warehouseMap.TryGetValue(currPos, out var ch))
         {
             return warehouseMap;
         }
-        var ch = warehouseMap[currPos];
+
         warehouseMap.Remove(currPos);
         warehouseMap[newPos] = ch;
 
