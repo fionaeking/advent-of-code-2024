@@ -174,7 +174,6 @@ public class Day14(string inputFilename) : IDay
                     Console.Write(".");
                 }
             }
-
             Console.WriteLine("");
         }
     }
